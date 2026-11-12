@@ -10,9 +10,13 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/catshop
       DB_RETRIES: "30"
+      PARTNER_URL: http://partner:8080
+      PARTNER_TIMEOUT: "2"
     depends_on:
       db:
         condition: service_healthy
+      partner:
+        condition: service_started
 
   db:
     image: postgres:16-alpine
@@ -28,6 +32,11 @@ services:
       timeout: 3s
       retries: 15
       start_period: 5s
+
+  partner:
+    image: wiremock/wiremock:3.6.0
+    volumes:
+      - ./partner/mappings:/home/wiremock/mappings:ro
 
 volumes:
   postgres_data:
