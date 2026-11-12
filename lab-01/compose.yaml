@@ -17,6 +17,10 @@ services:
         condition: service_healthy
       partner:
         condition: service_started
+    networks:
+      - app_egress
+      - db_internal
+      - partner_internal
 
   db:
     image: postgres:16-alpine
@@ -32,11 +36,27 @@ services:
       timeout: 3s
       retries: 15
       start_period: 5s
+    networks:
+      - db_internal
 
   partner:
     image: wiremock/wiremock:3.6.0
     volumes:
       - ./partner/mappings:/home/wiremock/mappings:ro
+    networks:
+      - partner_internal
 
 volumes:
   postgres_data:
+
+networks:
+  app_egress:
+    driver: bridge
+
+  db_internal:
+    driver: bridge
+    internal: true
+
+  partner_internal:
+    driver: bridge
+    internal: true
