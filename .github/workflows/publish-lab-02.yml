@@ -61,7 +61,7 @@ jobs:
   publish:
     name: Publish to GHCR
     needs: [test, build]
-    if: github.event_name == 'push'
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
