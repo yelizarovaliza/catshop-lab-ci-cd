@@ -15,6 +15,7 @@ name: publish-lab-02
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   test:
