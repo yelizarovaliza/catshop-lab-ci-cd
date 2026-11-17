@@ -1,6 +1,6 @@
 name: publish-lab-02
 
-on:
+"on":
   push:
     branches: [lab-02]
     paths:
