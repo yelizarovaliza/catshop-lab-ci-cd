@@ -1,0 +1,89 @@
+name: publish-lab-02
+
+on:
+  push:
+    branches: [lab-02]
+    paths:
+      - "lab-02/**"
+      - ".github/workflows/publish-lab-02.yml"
+  pull_request:
+    branches: [lab-02]
+    paths:
+      - "lab-02/**"
+      - ".github/workflows/publish-lab-02.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: lab-02
+        run: |
+          python -m pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run pytest
+        working-directory: lab-02
+        run: python -m pytest -v
+
+  build:
+    name: Build Docker image
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./lab-02
+          push: false
+          tags: catshop-lab-02:${{ github.run_id }}-${{ github.run_attempt }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+
+  publish:
+    name: Publish to GHCR
+    needs: [test, build]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./lab-02
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.run_id }}-${{ github.run_attempt }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
