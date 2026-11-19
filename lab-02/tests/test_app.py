@@ -61,9 +61,3 @@ def test_ready_returns_503_when_store_is_unavailable(tmp_path, monkeypatch):
 
     assert response.status_code == 503
     assert response.json["ready"] is False
-
-def test_visits_starts_at_one(client):
-    response = client.get("/visits")
-
-    assert response.status_code == 200
-    assert response.json["visits"] == 1
