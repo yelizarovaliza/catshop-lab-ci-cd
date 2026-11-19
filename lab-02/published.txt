@@ -1,0 +1,1 @@
+ghcr.io/yelizarovaliza/catshop-lab-ci-cd@sha256:5216ca516689587b609318d178b1444cb8f0d8269020e52e251b64fa72b0ded6
